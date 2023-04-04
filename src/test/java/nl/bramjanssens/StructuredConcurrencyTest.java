@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class StructuredConcurrencyTest {
 
     private StructuredConcurrency target;
-    private Response arthurDent = new Response("Arthur Dent", 1337);
+    private final Response arthurDent = new Response("Arthur Dent", 1337);
 
     @BeforeEach
     void setUp() {
