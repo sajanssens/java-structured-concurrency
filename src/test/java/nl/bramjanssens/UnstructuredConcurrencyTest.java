@@ -40,24 +40,22 @@ class UnstructuredConcurrencyTest {
     }
 
     @Test
-    void whenParentThreadFailsAllSubtasksLeak() throws InterruptedException {
-        assertThrows(RuntimeException.class, this::runHandleInFailingParentThread);
+    void whenParentThreadIsInterruptedAllSubtasksLeak() throws InterruptedException {
+        Thread parent = new Thread(this::runHandle);
+        parent.start();
+        parent.interrupt();
 
         // findUser and fetchOrder are still executed while they could have been cancelled
         Thread.sleep(1200);
-        System.out.println("");
     }
 
-    private void runHandleInFailingParentThread() {
-        new Thread(this::handle).start();
-        throw new RuntimeException("Parent fails");
-    }
-
-    private void handle() {
+    private void runHandle() {
         try {
             target.handle(42, 42);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException e) {
             throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            System.out.println("Parent is interrupted!");
         }
     }
 }
