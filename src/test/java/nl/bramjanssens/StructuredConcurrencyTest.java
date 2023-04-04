@@ -47,18 +47,22 @@ class StructuredConcurrencyTest {
     }
 
     @Test // AKA "Cancellation propagation"
-    void whenParentThreadFailsAllSubtasksAreCancelled() {
-        new Thread(() -> {
-            runHandle();
-            throw new RuntimeException();
-        }).start();
+    void whenParentThreadFailsAllSubtasksAreCancelled() throws InterruptedException {
+        Thread parent = new Thread(this::runHandle);
+        parent.start();
+        parent.interrupt();
+
+        // findUser and fetchOrder are cancelled
+        Thread.sleep(1200);
     }
 
     private void runHandle() {
         try {
             target.handle(42, 42);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException e) {
             throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            System.out.println("Parent is interrupted!");
         }
     }
 }
