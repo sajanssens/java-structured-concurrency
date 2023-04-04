@@ -24,7 +24,7 @@ class StructuredConcurrencyTest {
         assertEquals(arthurDent, result);
     }
 
-    @Test
+    @Test // AKA "Error handling with short-circuiting"
     void whenFetchOrderFailsFindUserIsCancelled() {
         ExecutionException e = assertThrows(ExecutionException.class, () -> target.handle(42, -42));
 
@@ -35,7 +35,7 @@ class StructuredConcurrencyTest {
         assertEquals("Black hole", e.getCause().getMessage());
     }
 
-    @Test
+    @Test // AKA "Error handling with short-circuiting"
     void whenFindUserFailsFetchOrderIsCancelled() {
         ExecutionException e = assertThrows(ExecutionException.class, () -> target.handle(44, 42));
 
@@ -46,7 +46,7 @@ class StructuredConcurrencyTest {
         assertEquals("This is not a hitchhiker!", e.getCause().getMessage());
     }
 
-    @Test
+    @Test // AKA "Cancellation propagation"
     void whenParentThreadFailsAllSubtasksAreCancelled() {
         new Thread(() -> {
             runHandle();
@@ -57,9 +57,7 @@ class StructuredConcurrencyTest {
     private void runHandle() {
         try {
             target.handle(42, 42);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

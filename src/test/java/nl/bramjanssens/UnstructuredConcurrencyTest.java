@@ -26,14 +26,14 @@ class UnstructuredConcurrencyTest {
 
     @Test
     void whenFetchOrderFailsThenThereIsAnUnnecessaryLongWaitOnFindUser() {
-        ExecutionException e = assertThrows(ExecutionException.class, () -> target.handle(42, -42));
+        assertThrows(ExecutionException.class, () -> target.handle(42, -42));
 
         // findUser is executed while it could have been cancelled
     }
 
     @Test
     void whenFindUserFailsThenFetchOrderLeaks() throws InterruptedException {
-        ExecutionException e = assertThrows(ExecutionException.class, () -> target.handle(0, 42));
+        assertThrows(ExecutionException.class, () -> target.handle(0, 42));
 
         // fetchOrder is executed while it could have been cancelled
         Thread.sleep(1005);
@@ -44,7 +44,8 @@ class UnstructuredConcurrencyTest {
         assertThrows(RuntimeException.class, this::runHandleInFailingParentThread);
 
         // findUser and fetchOrder are still executed while they could have been cancelled
-        Thread.sleep(1005);
+        Thread.sleep(1200);
+        System.out.println("");
     }
 
     private void runHandleInFailingParentThread() {

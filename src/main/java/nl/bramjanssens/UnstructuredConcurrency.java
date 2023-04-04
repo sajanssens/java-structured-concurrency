@@ -10,11 +10,11 @@ import static nl.bramjanssens.HitchhikersService.INSTANCE;
 public class UnstructuredConcurrency {
 
     private final HitchhikersService service = INSTANCE;
-    private final ExecutorService esvc = Executors.newCachedThreadPool();
+    private final ExecutorService exec = Executors.newCachedThreadPool();
 
     Response handle(int userId, int orderId) throws ExecutionException, InterruptedException {
-        Future<String> user = esvc.submit(() -> service.findUser(userId));
-        Future<Integer> order = esvc.submit(() -> service.fetchOrder(orderId));
+        Future<String> user = exec.submit(() -> service.findUser(userId));
+        Future<Integer> order = exec.submit(() -> service.fetchOrder(orderId));
 
         var theUser = user.get();   // join findUser (can throw ExecutionException, InterruptedException)
         var theOrder = order.get();  // join fetchOrder (can throw ExecutionException, InterruptedException)
