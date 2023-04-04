@@ -17,7 +17,7 @@ suspend fun <T> awaitAll(vararg results: Deferred<T>) = results.asList().awaitAl
 
 fun main() {
     runBlocking {
-        handle()
+        handle().forEach{ println(it)}
     }
 }
 
