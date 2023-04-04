@@ -5,29 +5,22 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static nl.bramjanssens.HitchhikersService.INSTANCE;
+
 public class StructuredConcurrency {
+
+    private final HitchhikersService service = INSTANCE;
 
     Response handle(int userId, int orderId) throws ExecutionException, InterruptedException {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            Future<String> user = scope.fork(() -> findUser(userId));
-            Future<Integer> order = scope.fork(() -> fetchOrder(orderId));
+            Future<String> user = scope.fork(() -> service.findUser(userId));
+            Future<Integer> order = scope.fork(() -> service.fetchOrder(orderId));
 
-            scope.join();           // Join both forks
-            scope.throwIfFailed();  // ... and propagate errors
+            scope.join();           // Join both forks          (can throw InterruptedException)
+            scope.throwIfFailed();  // ... and propagate errors (can throw ExecutionException)
 
             // Here, both forks have succeeded, so compose their results
             return new Response(user.resultNow(), order.resultNow());
         }
-    }
-
-    private String findUser(int userId) {
-        System.out.println("findUser");
-        if (userId == 42) return "Arthur Dent";
-        throw new IllegalArgumentException("This is not a hitchhiker!");
-    }
-
-    private int fetchOrder(int orderId) {
-        System.out.println("fetchOrder");
-        return orderId == 42 ? 1337 : 0;
     }
 }
